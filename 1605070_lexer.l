@@ -1,5 +1,6 @@
 %option noyywrap
 %x comment
+%x STR
 %{
     #include "1605070_SymbolTable.cpp"
     #include <cstdio>
@@ -13,10 +14,12 @@
     SymbolTable symbolTable(50);
     extern "C" int yylex();
     string current_comment = "";
+    string current_str = "";
 
     void strupr(char *str);
     void print_log(const char *type, const char *symbol);
     void filter_string(string& str);
+    void error_print(const char *message, const char *symbol);
 
 %}
 
@@ -58,6 +61,10 @@ DIGIT [0-9]+
     if(symbolTable.insert(yytext, "CONST_INT"))
         symbolTable.print();
 }
+{DIGIT}[^0-9\n ]+ {
+    string message = "Invalid prefix on ID or invalid suffix on Number";
+    error_print(message.c_str(), yytext);
+}
 
 [0-9]*\.{DIGIT}([eE][-+]?{DIGIT})? |
 {DIGIT}[eE][-+]?{DIGIT} {
@@ -68,16 +75,18 @@ DIGIT [0-9]+
         symbolTable.print();
 }
 
-
-
-\'.\' {
-    string str = "";
-    str += yytext[1];
-    fprintf(tokenout, "<CONST_CHAR, %c> ", yytext[1]);
-    print_log("CONST_CHAR", str.c_str());
-    if(symbolTable.insert(str, "CONST_CHAR"))
-        symbolTable.print();
+[0-9]*\.([0-9]*\.)+[0-9]* {
+    string message = "Too many decimal point";
+    error_print(message.c_str(), yytext);
 }
+
+[0-9]*\.?{DIGIT}[eE][-+]?([0-9]*\.)+[0-9]* {
+    string message = "Ill formed number";
+    error_print(message.c_str(), yytext);
+}
+
+ /* identifying characters */
+
 \'(\\n|\\t|\\\\|\\\"|\\a|\\f|\\r|\\b|\\v|\\0)\' {
     string str(yytext);
     filter_string(str);
@@ -87,6 +96,29 @@ DIGIT [0-9]+
         symbolTable.print();
 }
 
+\'[^\\](.)+\' {
+    string message = "Multi character constant error";
+    error_print(message.c_str(), yytext);
+}
+
+
+\'[^\n\\]\' {
+    string str = "";
+    str += yytext[1];
+    fprintf(tokenout, "<CONST_CHAR, %c> ", yytext[1]);
+    print_log("CONST_CHAR", str.c_str());
+    if(symbolTable.insert(str, "CONST_CHAR"))
+        symbolTable.print();
+}
+\'[\\]\'|\'[^\n\\\'][^\'] {
+    string message = "Unterminated character";
+    error_print(message.c_str(), yytext);
+}
+
+\'\' {
+    string message = "Empty character constant error";
+    error_print(message.c_str(), yytext);
+}
  /* operators and punctuators */
 [-+] {
     fprintf(tokenout, "<ADDOP, %s> ", yytext);
@@ -209,9 +241,14 @@ DIGIT [0-9]+
         symbolTable.print();
 }
 
+[0-9]+[a-zA-Z_0-9]+ {
+    string message = "Invalid prefix on ID or invalid suffix on Number";
+    error_print(message.c_str(), yytext);
+}
+
  /* strings */
 
-(\"[^"\n]*\\(\n[^"\n]*\\)*\n[^"\n]*\")|(\"[^"\n]*\") {
+ /*(\"[^"\n]*\\(\n[^"\n]*\\)*\n[^"\n]*\")|(\"[^"\n]*\") {
     string str(yytext);
     filter_string(str);
     fprintf(tokenout, "<STRING, %s> ", str.c_str());
@@ -219,6 +256,41 @@ DIGIT [0-9]+
     if(symbolTable.insert(str, "STRING"))
         symbolTable.print();
 }
+
+(\"[^"\n]*\\(\n[^"\n]*\\)*\n[^\"\n]*)|(\"[^"\n]*[^\\\n]) {
+    string message = "Unterminated string";
+    error_print(message.c_str(), yytext);
+}
+*/
+
+\" {
+    current_str += yytext;
+    BEGIN STR;
+}
+<STR>[^"\n]*\\[\n] {
+    current_str += yytext;
+}
+<STR>[^"\n]*\" {
+    current_str += yytext;
+    filter_string(current_str);
+    fprintf(tokenout, "<STRING, %s> ", current_str.c_str());
+    print_log("STRING", current_str.c_str());
+    if(symbolTable.insert(current_str, "STRING"))
+        symbolTable.print();
+    current_str = "";
+    BEGIN INITIAL;
+}
+<STR>[^"\n]*[\n] {
+    current_str += yytext;
+    //filter_string(current_str);
+    printf("ending error string %s\n", current_str.c_str());
+
+    string message = "Unterminated string";
+    error_print(message.c_str(), current_str.c_str());
+    current_str = "";
+    BEGIN INITIAL;
+}
+
 
  /* comment */
 \/\* { BEGIN comment;}
@@ -275,6 +347,10 @@ int main(int argc, char *argv[]) {
 
 void print_log(const char *type, const char *symbol){
     fprintf(logout, "Line no. %d: Token <%s> Lexeme %s found\n", line_count, type, symbol);
+}
+
+void error_print(const char *message, const char *symbol) {
+    fprintf(logout, "Error at line %d: %s %s\n", line_count, message, symbol);
 }
 
 void strupr(char *str) {
