@@ -15,7 +15,14 @@ ScopeTable::ScopeTable(int bucketNo) : totalBucket(bucketNo) {
     parentScope = nullptr;
     id = ++totalSt;
 }
-
+ScopeTable::ScopeTable(int bucketNo, FILE* log) : totalBucket(bucketNo) {
+    logout = log;
+    symbolBucket = new SymbolInfo *[bucketNo];
+    for(int i = 0; i < bucketNo; i++)
+        symbolBucket[i] = nullptr;
+    parentScope = nullptr;
+    id = ++totalSt;
+}
 int ScopeTable::totalSt = 0;
 
 ScopeTable::~ScopeTable() {
@@ -60,12 +67,13 @@ bool ScopeTable::insert(const string &name, const string &type) {
             last = last->getNext();
         }
         if(last->getName() == name && last->getType() == type) {
-            cout << "<" + name + "," + type + ">" + " already exits in current ScopeTable" << endl << endl;
+            //cout << "<" + name + "," + type + ">" + " already exits in current ScopeTable" << endl << endl;
+            fprintf(logout, "<%s, %s> already exists in current ScopeTable\n", name.c_str(), type.c_str());
             return false;
         }
         else last->setNext(symbol);
     }
-    printf("Inserted in ScopeTable# %d at position %d, %d\n\n", id, index, listLength);
+    //printf("Inserted in ScopeTable# %d at position %d, %d\n\n", id, index, listLength);
     return true;
 }
 
@@ -119,19 +127,23 @@ bool ScopeTable::deleteSymbol(const string &name) {
 }
 
 void ScopeTable::print() {
-    cout << "ScopeTable # " << id << endl;
+    //cout << "ScopeTable # " << id << endl;
+    fprintf(logout, "ScopeTable # %d\n", id);
     for (int i = 0; i < totalBucket; i++) {
         if(symbolBucket[i] == nullptr) continue;
-        cout << i << " ---> ";
+        //cout << i << " ---> ";
+        fprintf(logout, "%d ---> ", i);
         SymbolInfo *current = symbolBucket[i];
         while (current != nullptr) {
-            cout << "< " << current->getName() << " : " << current->getType() << ">  ";
+            //cout << "< " << current->getName() << " : " << current->getType() << ">  ";
+            fprintf(logout, "<%s : %s> ", current->getName().c_str(), current->getType().c_str());
             current = current->getNext();
         }
-        cout << endl;
+        //cout << endl;
+        fprintf(logout, "\n");
     }
-    cout << endl;
-
+    //cout << endl;
+    fprintf(logout, "\n");
 }
 
 int ScopeTable::hashFunction(string str) {

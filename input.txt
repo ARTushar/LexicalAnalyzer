@@ -8,8 +8,7 @@
 '\'
 ''
 "abcd
-"abcd\
-efgh
+z
 ijk"
 /**abc
 def

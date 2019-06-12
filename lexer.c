@@ -597,9 +597,9 @@ char *yytext;
 
     int line_count = 1;
     int total_error = 0;
-    FILE *logout;
-    FILE *tokenout;
-    SymbolTable symbolTable(50);
+    FILE *logout  = fopen("log.txt","w");
+    FILE *tokenout = fopen("token.txt","w");
+    SymbolTable symbolTable(10, logout);
     extern "C" int yylex();
     string current_comment = "";
     string current_str = "";
@@ -1047,7 +1047,6 @@ YY_RULE_SETUP
 #line 133 "1605070_lexer.l"
 {
     string message = "Unterminated character";
-    printf("damn\n");
     string text(yytext);
     text.pop_back();
     error_print(message.c_str(), text.c_str());
@@ -1057,7 +1056,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 143 "1605070_lexer.l"
+#line 142 "1605070_lexer.l"
 {
     string message = "Empty character constant error";
     error_print(message.c_str(), yytext);
@@ -1067,7 +1066,7 @@ YY_RULE_SETUP
 /* operators and punctuators */
 case 30:
 YY_RULE_SETUP
-#line 149 "1605070_lexer.l"
+#line 148 "1605070_lexer.l"
 {
     fprintf(tokenout, "<ADDOP, %s> ", yytext);
     print_log("ADDOP", yytext);
@@ -1077,7 +1076,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 156 "1605070_lexer.l"
+#line 155 "1605070_lexer.l"
 {
     fprintf(tokenout, "<MULOP, %s> ", yytext);
     print_log("MULOP", yytext);
@@ -1087,7 +1086,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 163 "1605070_lexer.l"
+#line 162 "1605070_lexer.l"
 {
     fprintf(tokenout, "<INCOP, %s> ", yytext);
     print_log("INCOP", yytext);
@@ -1097,7 +1096,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 170 "1605070_lexer.l"
+#line 169 "1605070_lexer.l"
 {
     fprintf(tokenout, "<RELOP, %s> ", yytext);
     print_log("RELOP", yytext);
@@ -1107,7 +1106,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 177 "1605070_lexer.l"
+#line 176 "1605070_lexer.l"
 {
     fprintf(tokenout, "<ASSIGNOP, %s> ", yytext);
     print_log("ASSIGNOP", yytext);
@@ -1117,7 +1116,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 184 "1605070_lexer.l"
+#line 183 "1605070_lexer.l"
 {
     fprintf(tokenout, "<LOGICOP, %s> ", yytext);
     print_log("LOGICOP", yytext);
@@ -1127,7 +1126,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 191 "1605070_lexer.l"
+#line 190 "1605070_lexer.l"
 {
     fprintf(tokenout, "<BITOP, %s> ", yytext);
     print_log("BITOP", yytext);
@@ -1137,7 +1136,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 198 "1605070_lexer.l"
+#line 197 "1605070_lexer.l"
 {
     fprintf(tokenout, "<NOT, !>");
     print_log("NOT", yytext);
@@ -1147,7 +1146,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 205 "1605070_lexer.l"
+#line 204 "1605070_lexer.l"
 {
     fprintf(tokenout, "<RPAREN, )> ");
     print_log("RPAREN", yytext);
@@ -1157,7 +1156,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 212 "1605070_lexer.l"
+#line 211 "1605070_lexer.l"
 {
     fprintf(tokenout, "<LPAREN, (> ");
     print_log("LPAREN", yytext);
@@ -1167,7 +1166,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 219 "1605070_lexer.l"
+#line 218 "1605070_lexer.l"
 {
     fprintf(tokenout, "<LCURL, {> ");
     print_log("LCURL", yytext);
@@ -1177,7 +1176,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 226 "1605070_lexer.l"
+#line 225 "1605070_lexer.l"
 {
     fprintf(tokenout, "<RCURL, }> ");
     print_log("RCURL", yytext);
@@ -1187,7 +1186,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 233 "1605070_lexer.l"
+#line 232 "1605070_lexer.l"
 {
     fprintf(tokenout, "<LTHIRD, [> ");
     print_log("LTHIRD", yytext);
@@ -1197,7 +1196,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 240 "1605070_lexer.l"
+#line 239 "1605070_lexer.l"
 {
     fprintf(tokenout, "<RTHIRD, ]> ");
     print_log("RTHIRD", yytext);
@@ -1207,7 +1206,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 247 "1605070_lexer.l"
+#line 246 "1605070_lexer.l"
 {
     fprintf(tokenout, "<COMMA, ,> ");
     print_log("COMMA", yytext);
@@ -1217,7 +1216,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 254 "1605070_lexer.l"
+#line 253 "1605070_lexer.l"
 {
     fprintf(tokenout, "<SEMICOLON, ;> ");
     print_log("SEMICOLON", yytext);
@@ -1228,7 +1227,7 @@ YY_RULE_SETUP
 /* Identifiers */
 case 46:
 YY_RULE_SETUP
-#line 263 "1605070_lexer.l"
+#line 262 "1605070_lexer.l"
 {
     fprintf(tokenout, "<ID, %s> ", yytext);
     print_log("ID", yytext);
@@ -1238,7 +1237,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 270 "1605070_lexer.l"
+#line 269 "1605070_lexer.l"
 {
     string message = "Invalid prefix on ID or invalid suffix on Number";
     error_print(message.c_str(), yytext);
@@ -1249,7 +1248,7 @@ YY_RULE_SETUP
 case 48:
 /* rule 48 can match eol */
 YY_RULE_SETUP
-#line 278 "1605070_lexer.l"
+#line 277 "1605070_lexer.l"
 {
     string str(yytext);
     filter_string(str);
@@ -1262,7 +1261,7 @@ YY_RULE_SETUP
 case 49:
 /* rule 49 can match eol */
 YY_RULE_SETUP
-#line 287 "1605070_lexer.l"
+#line 286 "1605070_lexer.l"
 {
     string message = "Unterminated string";
     error_print(message.c_str(), yytext);
@@ -1300,12 +1299,12 @@ YY_RULE_SETUP
 /* comment */
 case 50:
 YY_RULE_SETUP
-#line 324 "1605070_lexer.l"
+#line 323 "1605070_lexer.l"
 { comment_start_line = line_count; BEGIN comment;}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 325 "1605070_lexer.l"
+#line 324 "1605070_lexer.l"
 { 
     print_log("COMMENT", current_comment.c_str());
     current_comment = "";
@@ -1315,7 +1314,7 @@ YY_RULE_SETUP
 case 52:
 /* rule 52 can match eol */
 YY_RULE_SETUP
-#line 330 "1605070_lexer.l"
+#line 329 "1605070_lexer.l"
 {
      current_comment += yytext;
      line_count++;
@@ -1323,11 +1322,11 @@ YY_RULE_SETUP
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 334 "1605070_lexer.l"
+#line 333 "1605070_lexer.l"
 { current_comment += yytext; }
 	YY_BREAK
 case YY_STATE_EOF(comment):
-#line 335 "1605070_lexer.l"
+#line 334 "1605070_lexer.l"
 {
     string message = "Unterminated comment";
     fprintf(logout, "Error at line %d: %s %s\n\n", comment_start_line, message.c_str(), current_comment.c_str());
@@ -1339,7 +1338,7 @@ case YY_STATE_EOF(comment):
 case 54:
 /* rule 54 can match eol */
 YY_RULE_SETUP
-#line 343 "1605070_lexer.l"
+#line 342 "1605070_lexer.l"
 { 
     string str(yytext);
     str.erase(0,2);
@@ -1352,21 +1351,21 @@ YY_RULE_SETUP
 case 55:
 /* rule 55 can match eol */
 YY_RULE_SETUP
-#line 352 "1605070_lexer.l"
+#line 351 "1605070_lexer.l"
 { line_count++; }
 	YY_BREAK
 /* white space */
 case 56:
 YY_RULE_SETUP
-#line 355 "1605070_lexer.l"
+#line 354 "1605070_lexer.l"
 { }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 358 "1605070_lexer.l"
+#line 357 "1605070_lexer.l"
 ECHO;
 	YY_BREAK
-#line 1370 "lexer.c"
+#line 1369 "lexer.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(STR):
 	yyterminate();
@@ -2372,7 +2371,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 358 "1605070_lexer.l"
+#line 357 "1605070_lexer.l"
 
 
 int main(int argc, char *argv[]) {
@@ -2389,9 +2388,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    logout = fopen("log.txt","w");
-	tokenout = fopen("token.txt","w");
-
     yyin = finp;
 	yylex();
     fprintf(logout, "Total lines: %d\n", line_count);
@@ -2404,7 +2400,7 @@ int main(int argc, char *argv[]) {
 }
 
 void print_log(const char *type, const char *symbol){
-    fprintf(logout, "Line no. %d: Token <%s> Lexeme %s found\n", line_count, type, symbol);
+    fprintf(logout, "Line no. %d: Token <%s> Lexeme %s found\n\n", line_count, type, symbol);
 }
 
 void error_print(const char *message, const char *symbol) {

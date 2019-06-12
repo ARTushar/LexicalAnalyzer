@@ -4,8 +4,9 @@
 
 #include "1605070_SymbolTable.h"
 
-SymbolTable::SymbolTable(int bucket) : bucketSize(bucket){
-    currentScopeTable = new ScopeTable(bucketSize);
+SymbolTable::SymbolTable(int bucket, FILE* log) : bucketSize(bucket){
+    logout = log;
+    currentScopeTable = new ScopeTable(bucketSize, log);
 }
 
 SymbolTable::~SymbolTable() {
@@ -14,7 +15,7 @@ SymbolTable::~SymbolTable() {
 }
 
 void SymbolTable::enterScope() {
-    auto *newScope = new ScopeTable(bucketSize);
+    auto *newScope = new ScopeTable(bucketSize, logout);
     newScope->setParentScope(currentScopeTable);
     currentScopeTable = newScope;
     cout << "New ScopeTable with id " << newScope->getId() << " created" << endl << endl;

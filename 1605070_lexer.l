@@ -10,9 +10,9 @@
 
     int line_count = 1;
     int total_error = 0;
-    FILE *logout;
-    FILE *tokenout;
-    SymbolTable symbolTable(50);
+    FILE *logout  = fopen("log.txt","w");
+    FILE *tokenout = fopen("token.txt","w");
+    SymbolTable symbolTable(10, logout);
     extern "C" int yylex();
     string current_comment = "";
     string current_str = "";
@@ -131,7 +131,6 @@ DIGIT [0-9]+
 }
 \'.?[\n] {
     string message = "Unterminated character";
-    printf("damn\n");
     string text(yytext);
     text.pop_back();
     error_print(message.c_str(), text.c_str());
@@ -370,9 +369,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    logout = fopen("log.txt","w");
-	tokenout = fopen("token.txt","w");
-
     yyin = finp;
 	yylex();
     fprintf(logout, "Total lines: %d\n", line_count);
@@ -385,7 +381,7 @@ int main(int argc, char *argv[]) {
 }
 
 void print_log(const char *type, const char *symbol){
-    fprintf(logout, "Line no. %d: Token <%s> Lexeme %s found\n", line_count, type, symbol);
+    fprintf(logout, "Line no. %d: Token <%s> Lexeme %s found\n\n", line_count, type, symbol);
 }
 
 void error_print(const char *message, const char *symbol) {

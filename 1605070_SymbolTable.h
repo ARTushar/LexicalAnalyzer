@@ -11,10 +11,11 @@ using namespace std;
 
 class SymbolTable {
 private:
+    FILE* logout;
     ScopeTable *currentScopeTable;
     int bucketSize;
 public:
-    SymbolTable(int bucketSize);
+    SymbolTable(int bucketSize, FILE* log);
     void enterScope();
     void exitScope();
     bool insert(const string& name, const string& type);

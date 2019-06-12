@@ -14,6 +14,7 @@ protected:
 private:
     SymbolInfo **symbolBucket;
     ScopeTable *parentScope;
+    FILE* logout;
     int totalBucket;
     int id;
     int hashFunction(string str);
@@ -29,8 +30,8 @@ public:
     void print();
 
     //constructors
+    explicit ScopeTable(int bucketNo, FILE* fileout);
     explicit ScopeTable(int bucketNo);
-
     ScopeTable(int bucketNo, ScopeTable *parentScope);
 
     // getter and setter
