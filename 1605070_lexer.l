@@ -22,6 +22,7 @@
     void print_log(const char *type, const char *symbol);
     void filter_string(string& str);
     void error_print(const char *message, const char *symbol);
+    void count_line_str(string str);
 
 %}
 
@@ -63,7 +64,7 @@ DIGIT [0-9]+
     if(symbolTable.insert(yytext, "CONST_INT"))
         symbolTable.print();
 }
-{DIGIT}[^0-9\n ]+ {
+{DIGIT}[a-zA-Z_]+ {
     string message = "Invalid prefix on ID or invalid suffix on Number";
     error_print(message.c_str(), yytext);
     total_error++;
@@ -97,17 +98,17 @@ DIGIT [0-9]+
     filter_string(str);
     fprintf(tokenout, "<CONST_CHAR, %s> ", str.c_str());
     print_log("CONST_CHAR", str.c_str());
-    if(symbolTable.insert(str, "CONST_CHAR"))
+    if(symbolTable.insert(string(yytext), "CONST_CHAR"))
         symbolTable.print();
 }
 
-\'\\[^nt\\\"afrbv0] {
-    string message = "Multi character constant error";
+\'\\[^nt\\\"afrbv0\'\n] {
+    string message = "Unrecogized character constant error";
     error_print(message.c_str(), yytext);
     total_error++;
 }
 
-\'[^\\](.)+\' {
+\'[^\\\n][^\n]+\' {
     string message = "Multi character constant error";
     error_print(message.c_str(), yytext);
     total_error++;
@@ -125,16 +126,16 @@ DIGIT [0-9]+
 \'[\\]\'|\'[^\n\\\'][^\'\n] {
     string message = "Unterminated character";
     string text(yytext);
-    text.pop_back();
+    // text.pop_back();
     error_print(message.c_str(), text.c_str());
     total_error++;
 }
-\'.?[\n] {
+\'[^\']?[\n] {
     string message = "Unterminated character";
     string text(yytext);
     text.pop_back();
     error_print(message.c_str(), text.c_str());
-    total_error++; 
+    total_error++;
     line_count++;
 }
 
@@ -256,6 +257,8 @@ DIGIT [0-9]+
         symbolTable.print();
 }
 
+
+
  /* Identifiers */
 
 [a-zA-Z_][a-zA-Z_0-9]* {
@@ -271,22 +274,6 @@ DIGIT [0-9]+
     total_error++;
 }
 
- /* strings */
-
- (\"[^"\n]*\\(\n[^"\n]*\\)*\n[^"\n]*\")|(\"[^"\n]*\") {
-    string str(yytext);
-    filter_string(str);
-    fprintf(tokenout, "<STRING, %s> ", str.c_str());
-    print_log("STRING", str.c_str());
-    if(symbolTable.insert(str, "STRING"))
-        symbolTable.print();
-}
-
-(\"[^"\n]*\\(\n[^"\n]*\\)*\n[^\"\n]*)|(\"[^"\n]*[^\\\n]) {
-    string message = "Unterminated string";
-    error_print(message.c_str(), yytext);
-    total_error++;
-}
 
  /*
 \" {
@@ -317,10 +304,29 @@ DIGIT [0-9]+
     BEGIN INITIAL;
 } */
 
+ /* strings */
+
+(\"[^"\n]*\\(\n[^"\n]*\\)*\n[^"\n]*\")|(\"[^"\n]*\") {
+    string str(yytext);
+    filter_string(str);
+    fprintf(tokenout, "<STRING, %s> ", str.c_str());
+    print_log("STRING", str.c_str());
+    if(symbolTable.insert(string(yytext), "STRING"))
+        symbolTable.print();
+}
+
+(\"[^"\n]*\\(\n[^"\n]*\\)*\n[^\"\n]*)|(\"[^"\n]*[^\\]) {
+    string message = "Unterminated string";
+    string test(yytext);
+    count_line_str(test);
+    error_print(message.c_str(), yytext);
+    total_error++;
+}
+
 
  /* comment */
 \/\* { comment_start_line = line_count; BEGIN comment;}
-<comment>\*\/ { 
+<comment>\*\/ {
     print_log("COMMENT", current_comment.c_str());
     current_comment = "";
     BEGIN INITIAL;
@@ -338,12 +344,12 @@ DIGIT [0-9]+
     BEGIN INITIAL;
 }
 
-\/\/.*\\\n([^\n]+\\\n)*[^\n]*\n|\/\/.*\n { 
+\/\/.*\\\n([^\n]+\\\n)*[^\n]*\n|\/\/.*\n {
     string str(yytext);
     str.erase(0,2);
     str.pop_back();
     print_log("COMMENT", str.c_str());
-    line_count++; 
+    line_count++;
 }
 
  /*line count */
@@ -391,6 +397,14 @@ void error_print(const char *message, const char *symbol) {
 void strupr(char *str) {
     for(int i = 0; i < strlen(str); i++){
         str[i] = toupper(str[i]);
+    }
+}
+
+void count_line_str(string str) {
+    for(int i = 0; i < str.size(); i++){
+        if(str[i] == '\n'){
+            line_count++;
+        }
     }
 }
 

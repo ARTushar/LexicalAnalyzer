@@ -8,7 +8,10 @@
 '\'
 ''
 "abcd
-z
-ijk"
+"abcd\
+efg
+ijk
 /**abc
 def
+ghk
+klm
